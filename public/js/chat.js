@@ -18,7 +18,17 @@ function scrollToBottom() {
 };
 
 socket.on("connect", function()  {
-    console.log("Client detected a user");  
+    console.log("Client detected a user");
+    var params = jQuery.deparam(window.location.search);
+    socket.emit("join", params, function(err) {
+        if(err) {
+            alert(err);
+            window.location.href = "/";
+        } else {
+            console.log("No errors occured");
+        }
+    });
+
 });
 
 socket.on("newMessage", function(message) {

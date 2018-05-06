@@ -1,4 +1,5 @@
 const {generateMessage, generateLocationMessage} = require("./utils/message.js");
+const {isTypeOfString} = require("./utils/validation.js");
 const path = require("path");
 const express = require("express");
 const socketIO = require("socket.io");
@@ -17,9 +18,20 @@ app.use(express.static(publicPath));
 
 io.on("connection", (socket) => {
 
-    socket.emit("newMessage", generateMessage("Admin", "Hello new user!"));
     
-    socket.broadcast.emit("newMessage", generateMessage("Admin", "New user joined!"));    
+    socket.on("join", (params, callback) => {
+        if(!isTypeOfString(params.name) || !isTypeOfString(params.room)){
+            callback("Name and Room name are required.");
+        }
+
+        socket.join(params.room);
+
+
+        socket.emit("newMessage", generateMessage("Admin", "Hello new user!"));
+        socket.broadcast.to(params.room).emit("newMessage", generateMessage("Admin", `${params.name} has joined!`));  
+        //empty acknowledge, makes "err" in emits acknowledge empty
+        callback();
+    });
 
 
     socket.on("createMessage", (message, callback) =>{

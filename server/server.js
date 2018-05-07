@@ -41,9 +41,12 @@ io.on("connection", (socket) => {
 
 
     socket.on("createMessage", (message, callback) =>{
-        console.log(message);
+        var user = users.getUser(socket.id);
         
-        io.emit("newMessage", generateMessage(message.from, message.text));
+        if(user && isTypeOfString(message.text)){
+            io.to(user.room).emit("newMessage", generateMessage(user.name, message.text));
+        }
+        // io.emit("newMessage", generateMessage(message.from, message.text));
         callback("Info from server");
         //socket.broadcast.emit("newMessage", generateMessage(message.from, message.text));
     });
@@ -55,16 +58,19 @@ io.on("connection", (socket) => {
         var geocodeURL = `http://maps.googleapis.com/maps/api/geocode/json?address=${addressString}`;
 
         axios.get(geocodeURL).then((response) => {
-            if(response.data.error_message != undefined){
-                var textMSG ="I'm here at the moment, ";
-                io.emit("newLocationMessage", generateLocationMessage("Admin", textMSG, message.latitude, message.longitude));
-            } else {
-                var location = response.data.results[7].address_components[0].long_name;
-                var textMSG =`I am in ${location} now, `;
-                io.emit("newLocationMessage", generateLocationMessage("Admin", textMSG, message.latitude, message.longitude));              
-            }
-                
-                
+            var user = users.getUser(socket.id);
+            if(user){
+
+                if(response.data.error_message != undefined){
+                    var textMSG ="I'm here at the moment, ";
+                    io.to(user.room).emit("newLocationMessage", generateLocationMessage(user.name, textMSG, message.latitude, message.longitude));
+                } else {
+                    var location = response.data.results[7].address_components[0].long_name;
+                    var textMSG =`I am in ${location} now, `;
+                    io.to(user.room).emit("newLocationMessage", generateLocationMessage(user.name, textMSG, message.latitude, message.longitude));              
+                }
+
+            }              
             
         }).catch((e) => {
             console.log(e);

@@ -50,6 +50,17 @@ socket.on("newMessage", function(message) {
     // jQuery("#messagesList").append(li);
 });
 
+socket.on("updateUserList", function(users) {
+    var ol = jQuery("<ol></ol");
+    users.forEach(function(user){
+        ol.append(jQuery("<li></li>").text(user));
+        console.log(user);
+    });
+
+    jQuery("#users").html(ol);
+    console.log("Users: ", users);
+});
+
 socket.on("disconnect", function()  {
     console.log("Disconnected form the server");
 });

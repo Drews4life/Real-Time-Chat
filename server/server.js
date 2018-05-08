@@ -23,7 +23,7 @@ io.on("connection", (socket) => {
     
     socket.on("join", (params, callback) => {
         if(!isTypeOfString(params.name) || !isTypeOfString(params.room)){
-            return allback("Name and Room name are required.");
+            return callback("Name and Room name are required.");
         }
 
         socket.join(params.room);
